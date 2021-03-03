@@ -1,60 +1,34 @@
+import React, { useState, useEffect } from "react"; 
 import './App.css';
-import restaurant from './restaurant.jpg'; 
 
-function Header(props) {
-  console.log(props);
+//https://api.github.com/users/ddejongh
+
+function App({ login }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if(!login) return; 
+    setLoading(true);
+    fetch(`https://api.github.com/users/${login}`)
+    .then((response) => response.json())
+    .then(setData)
+    .then(() => setLoading(false))
+    .catch(setError);
+  }, [login]); // any time login changes this is called 
+
+  if(loading) return <h1>Loading... </h1>;
+  if(error)
+    return <pre>{JSON.stringify(error, null, 2)}</pre>; 
+  if(!data) return null;  
+
+
   return (
-    <header>
-      <h1>{props.name}'s Kitchen</h1>
-    </header>
-  )
-}
-
-function Main(props) {
-  return (
-    <section>
-      <p>We serve the most {props.adjective} food around.</p>
-      <img 
-        src={restaurant} 
-        height={500} 
-        alt="Steak at a fancy restaurant."
-      />
-      <ul style={{ textAlign: "left" }}>
-        {props.dishes.map((dish) => 
-        <li key={dish.id}>{dish.title}</li>)}
-      </ul>
-    </section>
-  )
-}
-
-function Footer(props) {
-  return (
-    <footer>
-      <p>Copyright {props.year}</p>
-    </footer>
-  )
-}
-
-const dishes = [
-  "Macaroni and Cheese",
-  "Salmon", 
-  "Tofu", 
-  "Vegetables", 
-  "Steak", 
-  "Ribeye", 
-];
-
-const dishObjects = dishes.map((dish, i) => ({id: i, title: dish}));
-// console.log(dishObjects);
-
-// dishes.map((dish) => console.log(dish));
-
-function App() {
-  return (
-    <div className="App">
-      <Header name="Bart"/>      
-      <Main adjective="amazing" dishes={dishObjects}/>
-      <Footer year={new Date().getFullYear()}/>
+    <div>
+      <h1>{data.name}</h1>
+      <p>{data.location}</p>
+      <img alt={data.login} src={data.avatar_url}/>
     </div>
   );
 }
